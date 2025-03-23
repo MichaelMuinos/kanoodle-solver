@@ -1,0 +1,86 @@
+[
+  {
+      "letter": "A",
+      "color": "ORANGE",
+      "shape": "100111",
+      "rows": 2,
+      "cols": 3
+  },
+  {
+      "letter": "B",
+      "color": "RED",
+      "shape": "110111",
+      "rows": 2,
+      "cols": 3
+  },
+  {
+      "letter": "C",
+      "color": "DARK_BLUE",
+      "shape": "01010111",
+      "rows": 4,
+      "cols": 2
+  },
+  {
+      "letter": "D",
+      "color": "LIGHT_PINK",
+      "shape": "11110010",
+      "rows": 2,
+      "cols": 4
+  },
+  {
+      "letter": "E",
+      "color": "DARK_GREEN",
+      "shape": "11000111",
+      "rows": 2,
+      "cols": 4
+  },
+  {
+      "letter": "F",
+      "color": "WHITE",
+      "shape": "1011",
+      "rows": 2,
+      "cols": 2
+  },
+  {
+      "letter": "G",
+      "color": "LIGHT_BLUE",
+      "shape": "111001001",
+      "rows": 3,
+      "cols": 3
+  },
+  {
+      "letter": "H",
+      "color": "DARK_PINK",
+      "shape": "110011001",
+      "rows": 3,
+      "cols": 3
+  },
+  {
+      "letter": "I",
+      "color": "YELLOW",
+      "shape": "110111",
+      "rows": 3,
+      "cols": 2
+  },
+  {
+      "letter": "J",
+      "color": "PURPLE",
+      "shape": "1111",
+      "rows": 1,
+      "cols": 4
+  },
+  {
+      "letter": "K",
+      "color": "LIGHT_GREEN",
+      "shape": "1111",
+      "rows": 2,
+      "cols": 2
+  },
+  {
+      "letter": "L",
+      "color": "GRAY",
+      "shape": "010111010",
+      "rows": 3,
+      "cols": 3
+  }
+] 
