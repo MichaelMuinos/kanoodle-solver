@@ -50,9 +50,17 @@ public class Args {
     private String image;
 
     public void validate() {
-        if (mode == null) throw new ParameterException("--mode is a required field.");
-        if (mode.equals(NORMAL_MODE) && image == null) throw new ParameterException("--image is required in normal mode.");
-        if (mode.equals(TEST_MODE) && (algorithm == null || config == null)) throw new ParameterException("--algorithm and --config are required in test mode.");
+        if (mode == null) {
+            throw new ParameterException("--mode is a required field.");
+        }
+
+        if (mode.equals(NORMAL_MODE) && image == null) {
+            throw new ParameterException("--image is required in normal mode.");
+        }
+
+        if (mode.equals(TEST_MODE) && (algorithm == null || config == null)) {
+            throw new ParameterException("--algorithm and --config are required in test mode.");
+        }
     }
 
     public static class ModeValidator implements IParameterValidator {
