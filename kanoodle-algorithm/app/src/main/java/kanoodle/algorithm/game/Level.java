@@ -49,7 +49,7 @@ public class Level {
     }
 
     private String getNormalModeString() {
-        if (!solved) return "[NORMAL_MODE] No valid answer.";
+        if (!solved) return "[NORMAL_MODE] No valid answer. [NORMAL_MODE]";
 
         StringBuilder result = new StringBuilder("[NORMAL_MODE] ");
         char[][] finalBoard = board.getFinalBoard();
@@ -58,6 +58,6 @@ public class Level {
             if (i != finalBoard.length - 1) result.append(",");
         }
 
-        return result.toString();
+        return result.append(" [NORMAL_MODE]").toString();
     }
 }
