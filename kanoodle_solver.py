@@ -3,9 +3,11 @@ import numpy as np
 import subprocess
 import os
 import cv2
+import json
 
 NORMAL_MODE_PREFIX = "[NORMAL_MODE]"
-DELIMITER = ","
+DELIMETER = ","
+COLOR_PATH = "colors.json"
 ROWS = 5
 COLS = 11
 CIRCLE_RADIUS = 20
@@ -15,56 +17,15 @@ CIRCLE_INCREMENT = 50
 OFFSET_LEFT = 25  # Move the board shape a bit to the right
 OFFSET_TOP = 100  # Move the board shape a bit down
 
-def get_piece_letter(r, g, b):
-    print(r, g, b)
-    # A = ORANGE
-    if (r >= 204 and r <= 255) and (g >= 40 and g <= 178) and (b >= 0 and b <= 102):
-        return 'A'
-    
-    # B = RED
-    if (r >= 135 and r <= 255) and (g >= 0 and g <= 51) and (b >= 0 and b <= 51):
-        return 'B'
-    
-    # C = DARK BLUE
-    if (r >= 0 and r <= 51) and (g >= 0 and g <= 100) and (b >= 116 and b <= 255):
-        return 'C'
-    
-    # D = LIGHT PINK
-    if (r >= 165 and r <= 255) and (g >= 110 and g <= 255) and (b >= 140 and b <= 255):
-        return 'D'
-    
-    # E = DARK GREEN
-    if (r >= 0 and r <= 30) and (g >= 70 and g <= 103) and (b >= 60 and b <= 103):
-        return 'E'
-    
-    # F = WHITE
-    if (r >= 165 and r <= 255) and (g >= 190 and g <= 255) and (b >= 190 and b <= 255):
-        return 'F'
-    
-    # G = LIGHT BLUE
-    if (r >= 50 and r <= 80) and (g >= 135 and g <= 200) and (b >= 160 and b <= 210):
-        return 'G'
-    
-    # H = DARK PINK
-    if (r >= 150 and r <= 225) and (g >= 50 and g <= 80) and (b >= 123 and b <= 170):
-        return 'H'
-    
-    # I = YELLOW
-    if (r >= 102 and r <= 255) and (g >= 102 and g <= 255) and (b >= 0 and b <= 153):
-        return 'I'
-    
-    # J = PURPLE
-    if (r >= 50 and r <= 178) and (g >= 0 and g <= 130) and (b >= 100 and b <= 255):
-        return 'J'
-    
-    # K = LIGHT GREEN
-    if (r >= 128 and r <= 175) and (g >= 170 and g <= 240) and (b >= 125 and b <= 205):
-        return 'K'
-    
-    # L = GRAY
-    if (r >= 110 and r <= 155) and (g >= 130 and g <= 230) and (b >= 160 and b <= 250):
-        return 'L'
-    
+def get_piece_letter(r, g, b, values):
+    def _is_valid(r, g, b, v):
+        return r >= v[0][0] and r <= v[0][1] and g >= v[1][0] and g <= v[1][1] and b >= v[2][0] and b <= v[2][1]
+
+    for letter in values:
+        v = values[letter]
+        if (_is_valid(r, g, b, v)):
+            return letter
+
     # If no piece matches, consider it an empty space
     return '-'
 
@@ -88,32 +49,41 @@ def draw_board(img):
 
 def crop_circle(img, i, j):
     h, w = img.shape[:2]
-    mask = np.zeros((h, w), np.uint8)
-    cv2.circle(mask, calculate_center(i, j), CIRCLE_RADIUS, CIRCLE_COLOR, -1)
+    mask = np.zeros((h, w), np.uint8)  # Empty black mask
+    cv2.circle(mask, calculate_center(i, j), CIRCLE_RADIUS, CIRCLE_COLOR, -1)  # Fill in white circle
     result = cv2.bitwise_and(img, img, mask=mask)
     x, y, w, h = cv2.boundingRect(mask)
     return result[y : y + h, x : x + w]
 
-def build_config(img):
-    config = ""
-    for i in range(1, 1 + 1):
-            for j in range(1, 1 + 1):
-                cropped_img = crop_circle(img.copy(), i, j)
-                cv2.imshow("test", cropped_img)
-                cv2.waitKey(0)
-                config += determine_letter(cropped_img)
-            
-            if i != ROWS:
-                config += DELIMITER
-
-    return config
-
-def determine_letter(cropped_img):
-    r, g, b = cv2.split(cropped_img)
+def determine_letter(img, values):
+    r, g, b = cv2.split(img)
     r_avg = cv2.mean(r)[0]
     g_avg = cv2.mean(g)[0]
     b_avg = cv2.mean(b)[0]
-    return get_piece_letter(int(r_avg),int(g_avg),int(b_avg))
+    print(int(r_avg), int(g_avg), int(b_avg))
+    letter = get_piece_letter(int(r_avg), int(g_avg), int(b_avg), values)
+    print(letter)
+    return letter
+
+def read_colors():
+    with open(COLOR_PATH, 'r') as file:
+        data = json.load(file)
+        return data
+
+def build_config(img):
+    config = ""
+    values = read_colors()
+    for i in range(1, ROWS + 1):
+        for j in range(1, COLS + 1):
+            cropped_img = crop_circle(img.copy(), i, j)
+            config += determine_letter(cropped_img, values)
+            cv2.imshow("test", cropped_img)
+            cv2.waitKey(0)
+
+        if i != ROWS:
+            config += DELIMETER
+    
+    return config
 
 if __name__ == "__main__":
     # Open default camera
@@ -143,6 +113,6 @@ if __name__ == "__main__":
     cap.release()
     cv2.destroyAllWindows()
 
-    print("Processing image...")
+    print("Processing config...")
     config = build_config(img)
     print(config)
