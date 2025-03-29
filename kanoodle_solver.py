@@ -5,13 +5,18 @@ import os
 import cv2
 
 NORMAL_MODE_PREFIX = "[NORMAL_MODE]"
+DELIMITER = ","
 ROWS = 5
 COLS = 11
+CIRCLE_RADIUS = 20
+CIRCLE_THICKNESS = 2
+CIRCLE_COLOR = (255, 255, 255)
 CIRCLE_INCREMENT = 50
 OFFSET_LEFT = 25  # Move the board shape a bit to the right
 OFFSET_TOP = 100  # Move the board shape a bit down
 
 def get_piece_letter(r, g, b):
+    print(r, g, b)
     # A = ORANGE
     if (r >= 204 and r <= 255) and (g >= 40 and g <= 178) and (b >= 0 and b <= 102):
         return 'A'
@@ -63,8 +68,7 @@ def get_piece_letter(r, g, b):
     # If no piece matches, consider it an empty space
     return '-'
 
-def build_command():
-    image = "EEGGGJJJJ--,AEEEGCDDDD-,AAALGCHHD--,BBLLLCFHH--,BBBLCCFFH--"
+def build_command(image):
     args = f"-m normal -i {image}"
     return f"./gradlew run --args=\'{args}\'"
 
@@ -74,29 +78,42 @@ def solve_config():
     solved_config = result.stdout.split(NORMAL_MODE_PREFIX)[1].strip()
     print(solved_config)
 
+def calculate_center(i, j):
+    return (j * CIRCLE_INCREMENT + OFFSET_LEFT, i * CIRCLE_INCREMENT + OFFSET_TOP)
+
 def draw_board(img):
     for i in range(1, ROWS + 1):
         for j in range(1, COLS + 1):
-            cv2.circle(img, (j * CIRCLE_INCREMENT + OFFSET_LEFT, i * CIRCLE_INCREMENT + OFFSET_TOP), 20, (255, 255, 255), 2)
+            cv2.circle(img, calculate_center(i, j), CIRCLE_RADIUS, CIRCLE_COLOR, CIRCLE_THICKNESS)
 
-def crop_circle(img, center):
+def crop_circle(img, i, j):
     h, w = img.shape[:2]
-    mask = np.zeros((h, w), np.uint8) # Empty black mask
-    cv2.circle(mask, center, 20, 255, -1)  # Fill in white circle
-    cropped_img = cv2.bitwise_and(img, mask)
-    return np.copy(cropped_img)
-
-def crop_circles(img):
-    h, w = img.shape[:2]
-
     mask = np.zeros((h, w), np.uint8)
-    cv2.circle(mask, center, 20, 255, -1)
-
+    cv2.circle(mask, calculate_center(i, j), CIRCLE_RADIUS, CIRCLE_COLOR, -1)
     result = cv2.bitwise_and(img, img, mask=mask)
     x, y, w, h = cv2.boundingRect(mask)
-    cropped_result = result[y:y+h, x:x+w]
+    return result[y : y + h, x : x + w]
 
-    return cropped_result
+def build_config(img):
+    config = ""
+    for i in range(1, 1 + 1):
+            for j in range(1, 1 + 1):
+                cropped_img = crop_circle(img.copy(), i, j)
+                cv2.imshow("test", cropped_img)
+                cv2.waitKey(0)
+                config += determine_letter(cropped_img)
+            
+            if i != ROWS:
+                config += DELIMITER
+
+    return config
+
+def determine_letter(cropped_img):
+    r, g, b = cv2.split(cropped_img)
+    r_avg = cv2.mean(r)[0]
+    g_avg = cv2.mean(g)[0]
+    b_avg = cv2.mean(b)[0]
+    return get_piece_letter(int(r_avg),int(g_avg),int(b_avg))
 
 if __name__ == "__main__":
     # Open default camera
@@ -127,12 +144,5 @@ if __name__ == "__main__":
     cv2.destroyAllWindows()
 
     print("Processing image...")
-
-    cv2.imshow("test", crop_circle_2(img, (1 * CIRCLE_INCREMENT + OFFSET_LEFT, 1 * CIRCLE_INCREMENT + OFFSET_TOP)))
-    cv2.waitKey(0)
-    cv2.imshow("test", crop_circle_2(img, (2 * CIRCLE_INCREMENT + OFFSET_LEFT, 1 * CIRCLE_INCREMENT + OFFSET_TOP)))
-    cv2.waitKey(0)
-    cv2.imshow("test", crop_circle_2(img, (3 * CIRCLE_INCREMENT + OFFSET_LEFT, 1 * CIRCLE_INCREMENT + OFFSET_TOP)))
-    cv2.waitKey(0)
-    cv2.imshow("test", crop_circle_2(img, (4 * CIRCLE_INCREMENT + OFFSET_LEFT, 1 * CIRCLE_INCREMENT + OFFSET_TOP)))
-    cv2.waitKey(0)
+    config = build_config(img)
+    print(config)
