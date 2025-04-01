@@ -8,13 +8,24 @@ import json
 import argparse
 
 NORMAL_MODE_PREFIX = "[NORMAL_MODE]"
+TRACKBAR_COLOR_FILE = "trackbar_colors.json"
 DELIMETER = ","
 # All colors other than white
 COMMON_THRESHOLD = 0.3
 # It is really hard to distinguish gray / light pink / white. Let's set
-# a really high white threshold to tell them apart
+# a really high white threshold to tell them apart.
 WHITE_PIECE = "F"
 WHITE_THRESHOLD = 0.7
+
+def solve_config(img):
+    def _build_command(img):
+        args = f"-m normal -i {img}"
+        return f"./gradlew run --args=\'{args}\'"
+
+    cwd = f"{os.getcwd()}/kanoodle-algorithm"
+    result = subprocess.run(build_command(), shell=True, capture_output=True, text=True, cwd=cwd)
+    solved_config = result.stdout.split(NORMAL_MODE_PREFIX)[1].strip()
+    print(solved_config)
 
 def get_letter(img, colors):
     def _calculate_letter_percentage(img, letter, lower_range, upper_range):
@@ -25,6 +36,8 @@ def get_letter(img, colors):
         matching_pixels = np.sum(mask > 0)
         percentage = matching_pixels / total_pixels
         print("percentage: ", percentage)
+
+        # Determine the appropriate threshold and return
         threshold = WHITE_THRESHOLD if letter == WHITE_PIECE else COMMON_THRESHOLD
         return percentage if percentage > threshold else 0
 
@@ -41,24 +54,14 @@ def get_letter(img, colors):
     print("letter: ", max_letter)
     return max_letter
 
-def build_command(image):
-    args = f"-m normal -i {image}"
-    return f"./gradlew run --args=\'{args}\'"
-
-def solve_config():
-    cwd = f"{os.getcwd()}/kanoodle-algorithm"
-    result = subprocess.run(build_command(), shell=True, capture_output=True, text=True, cwd=cwd)
-    solved_config = result.stdout.split(NORMAL_MODE_PREFIX)[1].strip()
-    print(solved_config)
-
-def read_trackbar_colors():
-    with open("trackbar/" + COLOR_OUTPUT, 'r') as file:
-        data = json.load(file)
-        return data
-
 def build_config(img):
+    def _read_trackbar_colors():
+        with open("trackbar/" + TRACKBAR_COLOR_FILE, 'r') as file:
+            data = json.load(file)
+            return data
+
     config = ""
-    values = read_trackbar_colors()
+    values = _read_trackbar_colors()
     for i in range(1, ROWS + 1):
         for j in range(1, COLS + 1):
             cropped_img = crop_circle(img, i, j)
@@ -77,7 +80,7 @@ if __name__ == "__main__":
 
     # Continuously show frames from the camera until the 'q' button is pressed
     # board = None
-    board = cv2.cvtColor(cv2.imread("trackbar/img2.png", cv2.IMREAD_COLOR), cv2.COLOR_BGR2HSV)
+    board = cv2.cvtColor(cv2.imread("trackbar/example-partial-empty-board.png", cv2.IMREAD_COLOR), cv2.COLOR_BGR2HSV)
     # while True:
     #     _, board = cap.read()
 

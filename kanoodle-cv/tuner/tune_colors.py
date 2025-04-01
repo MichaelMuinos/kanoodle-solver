@@ -6,11 +6,22 @@ import cv2
 import argparse
 
 PRESET_CONFIG = "EEGGGJJJJIIAEEEGCDDDDIAAALGCHHDIIBBLLLCFHHKKBBBLCCFFHKK"
-    
+
+class COLOR_DETECTION(Enum):
+    BGR = 1
+    HSV = 2
+
 def calculate_optimal_colors(bgr_img, hsv_img, colors):
     def _update_colors(bgr_img, hsv_img, letter, colors):
         def _helper(img, color_detection, letter, colors):
-            v, v2, v3 = split_image(img)
+            def _split_image(img):
+                v, v2, v3 = cv2.split(img)
+                v_avg = int(cv2.mean(v)[0])
+                v2_avg = int(cv2.mean(v2)[0])
+                v3_avg = int(cv2.mean(v3)[0])
+                return v_avg, v2_avg, v3_avg
+
+            v, v2, v3 = _split_image(img)
             if len(colors[letter][color_detection.name]) == 0:
                 colors[letter][color_detection.name] = [[v, v2, v3], [v, v2, v3]]
             else:
@@ -39,14 +50,8 @@ def calculate_optimal_colors(bgr_img, hsv_img, colors):
             hsv_cropped_img = crop_circle(hsv_img, i, j)
             _update_colors(bgr_cropped_img, hsv_cropped_img, letter, colors)
 
-def write_to_file(colors):
-    with open(COLOR_OUTPUT, 'w') as file:
-        json.dump(colors, file, indent=4)
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--write", help="determines if we will write the color boundaries to a file",
-                        action="store_true")
     parser.add_argument("--repeat", help="determines if we will continue to process images without constant button pressing",
                         action="store_true")
     args = parser.parse_args()
@@ -81,10 +86,4 @@ if __name__ == "__main__":
     cap.release()
     cv2.destroyAllWindows()
 
-    # Either write or print
-    if args.write:
-        print("Writing colors to file...")
-        write_to_file(colors)
-    else:
-        print("Printing colors...")
-        print(colors)
+    print(colors)
