@@ -11,7 +11,7 @@ NORMAL_MODE_PREFIX = "[NORMAL_MODE]"
 TRACKBAR_COLOR_FILE = "trackbar_colors.json"
 DELIMETER = ","
 # All colors other than white
-COMMON_THRESHOLD = 0.3
+COMMON_THRESHOLD = 0.25
 # It is really hard to distinguish gray / light pink / white. Let's set
 # a really high white threshold to tell them apart.
 WHITE_PIECE = "F"
