@@ -50,6 +50,7 @@ def calculate_optimal_colors(bgr_img, hsv_img, colors):
             hsv_cropped_img = crop_circle(hsv_img, i, j)
             _update_colors(bgr_cropped_img, hsv_cropped_img, letter, colors)
 
+# Does not work reliably :(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--repeat", help="determines if we will continue to process images without constant button pressing",

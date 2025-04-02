@@ -1,4 +1,4 @@
-from tuner.util import *
+from util import *
 
 import numpy as np
 import subprocess
@@ -35,7 +35,6 @@ def get_letter(img, colors):
         total_pixels = mask.shape[0] * mask.shape[1]
         matching_pixels = np.sum(mask > 0)
         percentage = matching_pixels / total_pixels
-        print("percentage: ", percentage)
 
         # Determine the appropriate threshold and return
         threshold = WHITE_THRESHOLD if letter == WHITE_PIECE else COMMON_THRESHOLD
@@ -44,14 +43,12 @@ def get_letter(img, colors):
     max_percentage = 0
     max_letter = '-'
     for letter in colors:
-        print("trying letter: ", letter)
         values = colors[letter]
         percentage = _calculate_letter_percentage(img.copy(), letter, values[0], values[1])
         if (percentage > max_percentage):
             max_percentage = percentage
             max_letter = letter
 
-    print("letter: ", max_letter)
     return max_letter
 
 def build_config(img):
@@ -66,8 +63,6 @@ def build_config(img):
         for j in range(1, COLS + 1):
             cropped_img = crop_circle(img, i, j)
             config += get_letter(cropped_img, values)
-            cv2.imshow("test", cv2.cvtColor(cropped_img, cv2.COLOR_HSV2BGR))
-            cv2.waitKey(0)
 
         if i != ROWS:
             config += DELIMETER
@@ -76,32 +71,31 @@ def build_config(img):
 
 if __name__ == "__main__":
     # Open default camera
-    # cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)
 
     # Continuously show frames from the camera until the 'q' button is pressed
-    # board = None
-    board = cv2.cvtColor(cv2.imread("trackbar/example-partial-empty-board.png", cv2.IMREAD_COLOR), cv2.COLOR_BGR2HSV)
-    # while True:
-    #     _, board = cap.read()
+    board = None
+    while True:
+        _, board = cap.read()
 
-    #     # Copy the board to draw on
-    #     modified_board = board.copy()
+        # Copy the board to draw on
+        modified_board = board.copy()
 
-    #     # Draw our board in the frame
-    #     draw_board(modified_board)
+        # Draw our board in the frame
+        draw_board(modified_board)
 
-    #     # Display the frame
-    #     cv2.imshow("board", modified_board)
+        # Display the frame
+        cv2.imshow("board", modified_board)
 
-    #     # Hit 'q' to process the frame and solve the configuration
-    #     if cv2.waitKey(1) == ord('q'):
-    #         cv2.imwrite("img2.png", board)
-    #         board = cv2.cvtColor(board, cv2.COLOR_BGR2HSV)
-    #         break
+        # Hit 'q' to process the frame and solve the configuration
+        if cv2.waitKey(1) == ord('q'):
+            cv2.imwrite("img2.png", board)
+            board = cv2.cvtColor(board, cv2.COLOR_BGR2HSV)
+            break
 
-    # # Release the camera and close the windows
-    # cap.release()
-    # cv2.destroyAllWindows()
+    # Release the camera and close the windows
+    cap.release()
+    cv2.destroyAllWindows()
 
     print("Processing config...")
     config = build_config(board)
