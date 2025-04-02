@@ -43,9 +43,6 @@ public class BacktrackingSolver extends Solver {
         for (int i = 0; i < Board.ROWS; i++) {
             for (int j = 0; j < Board.COLS; j++) {
                 if (board.addPiece(letter, shape, i, j)) {
-                    // We need to try to prune some of the paths to reduce the runtime.
-                    // Count the number of sections on the board and see if it is even possible
-                    // to place the remaining unused pieces there.
                     if (solveHelper(board, pieceIndex + 1, 0)) return true;
                     // This is where we backtrack. We previously added this piece onto the board
                     // successfully, but further pieces were not able to be added which means we
