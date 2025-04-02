@@ -151,6 +151,7 @@ if __name__ == "__main__":
 
         # Hit 'q' to process the frame and solve the configuration
         if cv2.waitKey(1) == ord('q'):
+            cv2.imwrite("example-config-3.png", board)
             board = cv2.cvtColor(board, cv2.COLOR_BGR2HSV)
             break
 
