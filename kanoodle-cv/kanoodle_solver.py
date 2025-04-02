@@ -39,7 +39,9 @@ def get_letter(img, colors, debug):
         if debug:
             print("Calculated Percentage: ", percentage)
 
-        # Determine the appropriate threshold and return
+        # Determine the appropriate threshold and return. The white piece is extremely accurate
+        # typically, so a separate threshold can be used for that specific piece. This will allow
+        # for the program to distinguish between gray, white, and light pink more easily.
         threshold = WHITE_THRESHOLD if letter == WHITE_PIECE else COMMON_THRESHOLD
         return percentage if percentage > threshold else 0
 
@@ -71,6 +73,8 @@ def build_config(img, values, debug):
         for j in range(1, COLS + 1):
             cropped_img = crop_circle(img, i, j)
             config += get_letter(cropped_img, values, debug)
+            # For debug mode we want to convert the cropped image back to BGR to
+            # know what colored ball it is.
             if debug:
                 cv2.imshow("cropped_img", cv2.cvtColor(cropped_img, cv2.COLOR_HSV2BGR))
                 cv2.waitKey(0)
@@ -82,11 +86,15 @@ def build_config(img, values, debug):
 
 def draw_solution(img, original_config, solved_config, values):
     def _draw_x(img):
+        # Calculate the center of the image
         height, width = img.shape[:2]
         center = (width // 2, height // 2)
+
+        # Draw the 'x' at the center
         cv2.drawMarker(img, center, color=[0, 0, 255], thickness=10, markerType=cv2.MARKER_TILTED_CROSS, line_type=cv2.LINE_AA, markerSize=100)
 
     def _draw_filled_circle(img, i, j, hsv_values):
+        # Take the middle HSV values and convert them to BGR.
         def _hsv_to_bgr_color(hsv_values):
             h = int((hsv_values[0][0] + hsv_values[1][0]) / 2)
             s = int((hsv_values[0][1] + hsv_values[1][1]) / 2)
@@ -100,12 +108,14 @@ def draw_solution(img, original_config, solved_config, values):
 
     solution_board = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
     if solved_config == NO_ANSWER:
+        # Draw an 'x' indicating that no solution was found
         _draw_x(solution_board)
     else:
         original_rows = original_config.split(DELIMETER)
         solved_rows = solved_config.split(DELIMETER)
         for i in range(1, ROWS + 1):
             for j in range(1, COLS + 1):
+                # Only draw a circle for an empty space (i.e. '-')
                 if original_rows[i - 1][j - 1] == EMPTY_SPACE:
                     hsv_values = values[solved_rows[i - 1][j - 1]]
                     _draw_filled_circle(solution_board, i, j, hsv_values)
