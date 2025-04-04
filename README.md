@@ -21,7 +21,7 @@ Using OpenCV, the colors are extracted from each ball and a string representatio
 ```
 where `I` = yellow, `J` = purple, `D` = light pink, `F` = white, and `H` = dark pink.
 
-The board string is then passed to a dancing links backtracking algorithm to find the first possible solution. Below is one solution for this example.
+The board string is then passed to a dancing links backtracking algorithm to find the first possible solution. The Python program then draws the solution over the original image.
 
 *Solution*
 
